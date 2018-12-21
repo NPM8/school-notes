@@ -1,4 +1,4 @@
 export interface Fisk {
-  pln: string;
-  eng: string;
+  pl: string;
+  en: string;
 }

@@ -1,0 +1,16 @@
+#adminpanel{
+    display: grid;
+    grid-template-columns: 150px auto;
+    /* justify-content: center; */
+    margin: auto;
+    padding: 20px;
+}
+#specs{
+    color: grey;
+}
+#centerButtons{
+    margin: auto;
+}
+#addTopic{
+    padding:20px;
+}

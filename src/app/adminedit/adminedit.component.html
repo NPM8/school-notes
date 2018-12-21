@@ -1,0 +1,46 @@
+<div class="">
+  <div id="addTopic" class="">
+    <button class="btn" (click)="showAdd=true">Add fisk</button>
+
+  </div>
+
+<div id="adminpanel" *ngFor="let fisk of fisks; let i = index">
+  <div>
+    <div>
+      <h3>Fisk {{i}}</h3>
+    </div>
+    <div class="specs">Polish: "{{fisk.pl}}"</div>
+    <div class="specs">Polish: "{{fisk.en}}"</div>
+  </div>
+  <div id="centerButtons">
+    <button class="btn btn-danger" (click)="delete(i)" > Delete </button>
+    <button class="btn btn-success" (click)="handleEditClick(i)"> Edit</button>
+  </div>
+
+</div>
+<clr-modal [(clrModalOpen)]="showEdit" [clrModalClosable]="false">
+  <h3 class="modal-title">Edit fisk</h3>
+  <div class="modal-body">
+    <p>You can set your fisk now!</p>
+    <input class="clr-input" [value]="edited.pl" (change)="handleChange($event, 'pl')" />
+    <input class="clr-input" [value]="edited.en" (change)="handleChange($event, 'en')" />
+  </div>
+  <div class="modal-footer">
+    <button (click)="showEdit=false" class="btn btn-outline" type="button">Cancel</button>
+    <button (click)="edit(editedId)" class="btn btn-primary" type="button">Ok</button>
+  </div>
+
+</clr-modal>
+  <clr-modal [(clrModalOpen)]="showAdd" [clrModalClosable]="false">
+    <h3 class="modal-title">New fisk</h3>
+    <div class="modal-body">
+      <p>Set the data</p>
+      <input class="clr-input" [value]="toAdd.pl" (change)="handleAddChange($event, 'pl')" />
+      <input class="clr-input" [value]="toAdd.en" (change)="handleAddChange($event, 'en')" />
+    </div>
+    <div class="modal-footer">
+      <button (click)="showAdd=false" class="btn btn-outline" type="button">Cancel</button>
+      <button (click)="add()" class="btn btn-primary" type="button">Ok</button>
+    </div>
+  </clr-modal>
+</div>

@@ -1,0 +1,9 @@
+<a href="/admin" class="btn btn-outline">admin</a>
+<div class="content-container" id="main">
+  <div class="content-area">
+    <app-learn [lessons]="list" *ngIf="!showLessons" (end)="handleEnd()"></app-learn>
+  </div>
+  <nav class="sidenav">
+    <app-list (start)="hadnleStart($event)" *ngIf="showLessons"></app-list>
+  </nav>
+</div>

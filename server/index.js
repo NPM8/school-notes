@@ -7,73 +7,201 @@ const fs = require("fs");
 const app = express();
 
 const option = {
-  origin: "http://localhost:4200",
+  origin: "http://81.21.193.231:9000",
   method: "*",
   optionsSuccessStatus: 200
 };
 
 app.use(bodyParser.json());
-
+app.use(express.static("public"));
 let file;
-fs.readFile("./.xml", (err, data) => {
+fs.readFile("./kurs.xml", (err, data) => {
   if (err) {
     throw err;
   }
   const datatmp = data.toString().replace(/\r?\n|\r| {2,}/g, '');
   // console.log(datatmp)
   file = xml.parseXmlString(datatmp);
+
 });
 
-// app.use(cors(option));
-
-app.options("/magazines/get/magazines", cors(option));
-
-app.post("/magazines/get/magazines", cors(option), (req, res) => {
-  let resp = [];
-  const {name} = req.body;
-  let year = (req.body.year === "all") ? "*" : `*[@rok=\'${req.body.year}\']`;
-  let obj = file.find(`/czasopisma/${name}/${year}`);
-  console.log(obj[0].text());
-  for (let value of obj) {
-    let tmp = {};
-    if (value.attr("brak")) {
-      tmp.nazwa =""
-      tmp.numer =""
-      tmp.wydawca =""
-      tmp.format =""
-      tmp.stron =""
-      tmp.miniaturka =""
-      tmp.plik =""
-      tmp.skan =""
-      tmp.przetworzenie =""
-      tmp.podeslal =""
-      tmp.brak = value.attr("brak").value();
+function save() {
+  fs.writeFile("./kurs.xml", file.toString(), (err) => {
+    if(err) {
+      console.log("somefing went wrong")
     } else {
-      tmp.nazwa = value.get("nazwa").text();
-      tmp.numer = value.get("numer").text();
-      tmp.wydawca = value.get("wydawca").text();
-      tmp.format = value.get("format").text();
-      tmp.stron = value.get("stron").text();
-      tmp.miniaturka = `http://atarionline.pl/biblioteka/czasopisma/${name}/${value.get("miniaturka").text()}`;
-      tmp.plik = `http://atarionline.pl/biblioteka/czasopisma/${name}/${value.get("plik").text()}`;
-      tmp.skan = value.get("skan").text();
-      tmp.przetworzenie = value.get("przetworzenie").text();
-      tmp.podeslal = value.get("podeslal").text();
-      tmp.brak = "";
+      console.log("OK");
     }
+  })
+}
 
+app.options("/kurs/get/kurs", cors(option));
+
+app.get("/api/lessons/list", cors(option), (req, res)  => {
+  let resp = []
+
+  let obj = file.find(`//lekcja`);
+  console.log(obj);
+  for (let objElement of obj) {
+    let tmp = {}
+    tmp.id = objElement.attr('nr').value()
+    tmp.name = objElement.attr("nazwa") && objElement.attr("nazwa").value()
     resp.push(tmp)
   }
-
-  res.json(resp);
+  // resp = resp.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0))
+  console.log(resp)
+  res.json(resp)
 });
 
-app.options("/magazines/get/years", cors(option));
-
+app.get("/api/lessons/:id", cors(option), (req, res) => {
+  // console.log(req);
+  let resp = {name:"", data: []}
+  // console.log(file.get("//").text());
+  console.log(req.params);
+  let obj = file.find(`//lekcja[@nr='${req.params.id}']`);
+  console.log(obj[0]);
+  resp.name = obj[0].attr("nazwa") && obj[0].attr("nazwa").value()
+  for (let objElement of obj[0].find("slowo")) {
+    let tmp = {}
+    tmp.en = objElement.get('en').text();
+    tmp.pl = objElement.get('pl').text();
+    resp.data.push(tmp)
+  }
+  // resp = resp.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0))
+  console.log(resp)
+  res.json(resp)
+});
 
 
 const port = 9000;
+app.options("/api/lesson/edit/:id",cors(option));
+app.post("/api/lesson/edit/:id",cors(option), (req, res) => {
+  console.log("test")
+  let resp = {name:"", data: []}
+  let obj = file.find(`//lekcja[@nr='${req.params.id}']`);
+  console.log(obj[0].text());
+  obj[0].attr({nazwa: req.body.name});
+  save();
+  resp.name = obj[0].attr("nazwa") && obj[0].attr("nazwa").value()
+  for (let objElement of obj[0].find("slowo")) {
+    let tmp = {}
+    tmp.en = objElement.get('en').text();
+    tmp.pl = objElement.get('pl').text();
+    resp.data.push(tmp)
+  }
+  res.json(resp);
+});
+
+app.options("/api/lesson/add",cors(option));
+app.post("/api/lesson/add",cors(option), (req, res) => {
+  let resp = []
+  console.log("test", "add");
+  let obj = file.find(`//lekcja`);
+  let root = file.root();
+  root.node("lekcja").attr({nazwa: req.body.name, nr: obj.length+1});
+  obj = file.find(`//lekcja`);
+  console.log(obj);
+  for (let objElement of obj) {
+    let tmp = {}
+    tmp.id = objElement.attr('nr').value()
+    tmp.name = objElement.attr("nazwa") && objElement.attr("nazwa").value()
+    resp.push(tmp)
+  }
+  // resp = resp.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0))
+  console.log(resp)
+  res.json(resp)
+});
+
+app.options("/api/lesson/:id/edit/:fisk",cors(option));
+app.post("/api/lesson/:id/edit/:fisk", cors(option), (req, res) => {
+  let resp = {name:"", data: []}
+  // console.log(file.get("//").text());
+  console.log(req.params);
+  let obj = file.find(`//lekcja[@nr='${req.params.id}']`);
+  console.log(obj[0]);
+  let elems = obj[0].find("slowo");
+  if (req.body.pl) {
+    elems[req.params.fisk].get("pl").text(req.body.pl)
+  }
+
+  if (req.body.en) {
+    elems[req.params.fisk].get("en").text(req.body.en)
+  }
+
+  resp.name = obj[0].attr("nazwa") && obj[0].attr("nazwa").value()
+  for (let objElement of obj[0].find("slowo")) {
+    let tmp = {}
+    tmp.en = objElement.get('en').text();
+    tmp.pl = objElement.get('pl').text();
+    resp.data.push(tmp)
+  }
+  // resp = resp.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0))
+  console.log(resp)
+  res.json(resp)
+});
+
+app.options("/api/lesson/:id/addfisk", cors(option));
+app.post("/api/lesson/:id/addfisk", cors(option), (req, res) => {
+  let resp = {name:"", data: []}
+  // console.log(file.get("//").text());
+  console.log(req.params);
+  let obj = file.find(`//lekcja[@nr='${req.params.id}']`);
+  obj[0].node("slowo")
+    .node("pl", req.body.pl)
+    .parent().node("en", req.body.en)
+
+  resp.name = obj[0].attr("nazwa") && obj[0].attr("nazwa").value()
+  for (let objElement of obj[0].find("slowo")) {
+    let tmp = {}
+    tmp.en = objElement.get('en').text();
+    tmp.pl = objElement.get('pl').text();
+    resp.data.push(tmp)
+  }
+  // resp = resp.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0))
+  console.log(resp)
+  res.json(resp)
+});
+
+app.options("/api/lesson/:id/removefisk", cors(option));
+app.get("/api/lesson/:id/removefisk/:fisk", cors(option), (req, res) => {
+  let resp = {name:"", data: []}
+  // console.log(file.get("//").text());
+  console.log(req.params);
+  let obj = file.find(`//lekcja[@nr='${req.params.id}']`);
+  let elems = obj[0].find("slowo");
+  elems[req.params.fisk].remove();
+
+  resp.name = obj[0].attr("nazwa") && obj[0].attr("nazwa").value()
+  for (let objElement of obj[0].find("slowo")) {
+    let tmp = {}
+    tmp.en = objElement.get('en').text();
+    tmp.pl = objElement.get('pl').text();
+    resp.data.push(tmp)
+  }
+  // resp = resp.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0))
+  console.log(resp)
+  res.json(resp)
+});
+
+app.get("/api/lesson/remove/:id", cors(option),(req, res) => {
+  let obj = file.find(`//lekcja[@nr='${req.params.id}']`);
+  obj[0].remove()
+
+  let resp = []
+
+  obj = file.find(`//lekcja`);
+  console.log(obj);
+  for (let objElement of obj) {
+    let tmp = {}
+    tmp.id = objElement.attr('nr').value()
+    tmp.name = objElement.attr("nazwa") && objElement.attr("nazwa").value()
+    resp.push(tmp)
+  }
+  // resp = resp.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0))
+  console.log(resp)
+  res.json(resp)
+});
 
 
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+app.listen(port, () => console.log(`App listening on port ${port}!`));

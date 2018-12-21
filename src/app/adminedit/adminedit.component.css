@@ -1,0 +1,13 @@
+#adminpanel{
+  padding:20px;
+  display: grid;
+  grid-template-columns: 150px auto;
+  /* justify-content: center; */
+  margin: auto;
+}
+.specs{
+  color: grey;
+}
+#centerButtons{
+  margin: auto;
+}

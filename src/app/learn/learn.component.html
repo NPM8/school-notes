@@ -1,11 +1,28 @@
-<ng-template *ngIf="showTrl; then first else sec ">
+<div id="content">
 
-</ng-template>
+  <ng-template *ngIf="showTrl; then first else sec ">
 
-<div #first class="">
-  {{actulaFisk.pln}}
+  </ng-template>
+  <ng-template #first>
+    <div class="btn btn-danger-outline" (click)="startGame()">
+      {{actulaFisk.pl}}
+    </div>
+  </ng-template>
+
+  <ng-template #sec>
+    <div class="btn btn-danger-outline" (click)="startGame()">
+      {{actulaFisk.en}}
+    </div>
+  </ng-template>
 </div>
-
-<div #sec class="">
-  {{actulaFisk.eng}}
+<div>
+<clr-modal [(clrModalOpen)]="showEnd" [clrModalClosable]="false">
+  <h3 class="modal-title">You done it!</h3>
+  <div class="modal-body">
+    <p>Do it again</p>
+  </div>
+  <div class="modal-footer">
+    <button (click)="handleEnd()" class="btn btn-primary" type="button">Ok</button>
+  </div>
+</clr-modal>
 </div>

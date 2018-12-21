@@ -1,3 +1,9 @@
-<p>
-  list works!
-</p>
+<form [formGroup]="checked" id="list" (ngSubmit)="submit()">
+    <label  formArrayName="lessons" *ngFor="let less of checked.controls.lessons.controls; let i = index">
+      <input type="checkbox" [formControlName]="i"/>
+      {{lessons[i].id}}: {{lessons[i].name}}
+    </label>
+  <button type="submit" class="btn btn-outline">Submit</button>
+  <button class="btn btn-outline" (click)="checkAll($event)">Check All</button>
+</form>
+

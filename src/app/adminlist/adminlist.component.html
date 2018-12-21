@@ -1,0 +1,45 @@
+<div>
+  <div id="addTopic" class="">
+    <button class="btn" (click)="showAdd=true">Add topic</button>
+
+  </div>
+
+  <div id="adminpanel" *ngFor="let less of lessons">
+    <div>
+      <div>
+        <h3>Lesson {{less.id}}</h3>
+      </div>
+      <div id="specs">topic: "{{less.name}}"</div>
+    </div>
+
+    <div id="centerButtons">
+      <button class="btn btn-danger" (click)="handleDeletePress(less.id)"> Delete </button>
+      <a class="btn btn-success" href="/admin/edit/{{less.id}}"> Edit</a>
+      <button class="btn btn-primary" (click)="handleClickShowSetName(less.id, less.name)">Rename</button>
+    </div>
+
+  </div>
+  <clr-modal [(clrModalOpen)]="showEdit" [clrModalClosable]="false">
+    <h3 class="modal-title">New title</h3>
+    <div class="modal-body">
+      <p>You can set your new title now!</p>
+      <input class="clr-input" [value]="name" (change)="handleChange($event)" />
+    </div>
+    <div class="modal-footer">
+      <button (click)="showEdit=false" class="btn btn-outline" type="button">Cancel</button>
+      <button (click)="handleSetName()" class="btn btn-primary" type="button">Ok</button>
+    </div>
+  </clr-modal>
+
+  <clr-modal [(clrModalOpen)]="showAdd" [clrModalClosable]="false">
+      <h3 class="modal-title">New lesson</h3>
+      <div class="modal-body">
+        <p>Set the name</p>
+        <input class="clr-input" [value]="addname" (change)="hadnleAddChange($event)" />
+      </div>
+      <div class="modal-footer">
+        <button (click)="showAdd=false" class="btn btn-outline" type="button">Cancel</button>
+        <button (click)="hadleAdd()" class="btn btn-primary" type="button">Ok</button>
+      </div>
+    </clr-modal>
+</div>
