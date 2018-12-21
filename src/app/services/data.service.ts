@@ -17,7 +17,7 @@ export class DataService {
 
   constructor(private http: HttpClient) { }
 
-  private baseUrl = 'http://91.21.193.231:9000/api';
+  private baseUrl = 'http://81.21.193.231:9000/api';
 
   public getOne(id: number): Observable<Fisk> {
     return this.http.get<Fisk>(`${this.baseUrl}/elem/${id}`).pipe(retry(3));
